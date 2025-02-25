@@ -60,6 +60,12 @@
             color: white;
             outline: none;
         }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
         .login-btn, .signup-btn {
             width: 100%;
             padding: 10px;
@@ -70,6 +76,9 @@
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
+            text-align: center;
+            display: block;
+            text-decoration: none;
         }
         .login-btn:hover, .signup-btn:hover {
             background: #09a3b6;
@@ -90,9 +99,18 @@
         }
     </style>
     <script>
+        let savedEmail = "";
+        let savedPassword = "";
+
         function toggleForm() {
             document.querySelector('.login-box').classList.toggle('active');
             document.querySelector('.signup-box').classList.toggle('active');
+
+            // Change Welcome Message
+            let welcomeText = document.querySelector('.welcome-box h2');
+            welcomeText.innerText = document.querySelector('.login-box').classList.contains('active') 
+                ? "WELCOME BACK!" 
+                : "WELCOME!";
         }
 
         function validateSignup() {
@@ -101,61 +119,123 @@
             let password = document.getElementById('new-password').value;
             let confirmPassword = document.getElementById('confirm-password').value;
 
-            if (!name || !email || !password || !confirmPassword) {
-                alert('All fields are required!');
-                return false;
+            let nameError = document.getElementById('name-error');
+            let emailError = document.getElementById('email-error');
+            let passwordError = document.getElementById('password-error');
+            let confirmPasswordError = document.getElementById('confirm-password-error');
+
+            // Reset previous error messages
+            nameError.style.display = "none";
+            emailError.style.display = "none";
+            passwordError.style.display = "none";
+            confirmPasswordError.style.display = "none";
+
+            let isValid = true;
+
+            if (!name) {
+                nameError.style.display = "block";
+                isValid = false;
+            }
+            if (!email) {
+                emailError.style.display = "block";
+                isValid = false;
+            }
+            if (!password) {
+                passwordError.style.display = "block";
+                isValid = false;
             }
             if (password !== confirmPassword) {
-                alert('Passwords do not match!');
-                return false;
+                confirmPasswordError.style.display = "block";
+                isValid = false;
             }
-            toggleForm();
+
+            if (!isValid) return;
+
+            // Save email and password for login verification
+            savedEmail = email;
+            savedPassword = password;
+
+            document.getElementById('signup-success').style.display = "block";
+            setTimeout(() => {
+                toggleForm();
+                document.getElementById('signup-success').style.display = "none";
+            }, 1500);
+        }
+
+        function validateLogin(event) {
+            event.preventDefault(); // Prevent default link behavior
+
+            let email = document.getElementById('login-email').value;
+            let password = document.getElementById('login-password').value;
+
+            let loginError = document.getElementById('login-error');
+
+            loginError.style.display = "none";
+
+            if (!email || !password) {
+                loginError.innerText = "All fields are required!";
+                loginError.style.display = "block";
+                return;
+            }
+            if (email !== savedEmail || password !== savedPassword) {
+                loginError.innerText = "Invalid email or password!";
+                loginError.style.display = "block";
+                return;
+            }
+
+            window.location.href = "mainpage.html";
         }
     </script>
 </head>
 <body>
     <div class="container">
+        <!-- Login Form -->
         <div class="login-box active">
             <h2>Login</h2>
             <div class="input-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" placeholder="Enter username" required>
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" placeholder="Enter email" required>
             </div>
             <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Enter password" required>
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" placeholder="Enter password" required>
             </div>
-            <button class="login-btn">Login</button>
+            <p id="login-error" class="error-message"></p>
+            <a href="#" class="login-btn" onclick="validateLogin(event)">Login</a>
             <div class="signup-link">
                 Don't have an account? <a href="#" onclick="toggleForm()" style="color: #0fd5ea;">Sign Up</a>
             </div>
         </div>
+
+        <!-- Signup Form -->
         <div class="signup-box">
             <h2>Sign Up</h2>
             <div class="input-group">
                 <label for="name">Name</label>
                 <input type="text" id="name" placeholder="Enter full name" required>
+                <p id="name-error" class="error-message">Name is required!</p>
             </div>
             <div class="input-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" placeholder="Enter email" required>
+                <p id="email-error" class="error-message">Email is required!</p>
             </div>
             <div class="input-group">
                 <label for="new-password">Password</label>
                 <input type="password" id="new-password" placeholder="Enter password" required>
+                <p id="password-error" class="error-message">Password is required!</p>
             </div>
             <div class="input-group">
                 <label for="confirm-password">Confirm Password</label>
                 <input type="password" id="confirm-password" placeholder="Confirm password" required>
+                <p id="confirm-password-error" class="error-message">Passwords do not match!</p>
             </div>
-            <button class="signup-btn" onclick="validateSignup()">Create Account</button>
-            <div class="login-link">
-                Already have an account? <a href="#" onclick="toggleForm()" style="color: #0fd5ea;">Login</a>
-            </div>
+            <p id="signup-success" class="error-message" style="color: green;">Account created successfully!</p>
+            <a href="#" class="signup-btn" onclick="validateSignup()">Create Account</a>
         </div>
+
         <div class="welcome-box">
             <h2>WELCOME BACK!</h2>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing.</p>
         </div>
     </div>
 </body>
